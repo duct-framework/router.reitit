@@ -1,6 +1,12 @@
-(ns duct.router.reitit)
+(ns duct.router.reitit
+  (:require [integrant.core :as ig]
+            [reitit.ring :as ring]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(def ^:private handler-keys
+  [:middleware :inject-match? :inject-router?])
+
+(defmethod ig/init-key :duct.router/reitit
+  [_ {:keys [routes] :as options}]
+  (ring/ring-handler
+   (ring/router routes (apply dissoc options handler-keys))
+   (select-keys options handler-keys)))
