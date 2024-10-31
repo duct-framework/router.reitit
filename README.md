@@ -1,4 +1,4 @@
-# Duct Reitit Router
+# Duct Reitit Router [![Build Status](https://github.com/duct-framework/router.reitit/actions/workflows/test.yml/badge.svg)](https://github.com/duct-framework/router.reitit/actions/workflows/test.yml)
 
 A router [Duct][] framework that uses [Reitit][]. This library is also
 compatible with [Integrant][].
