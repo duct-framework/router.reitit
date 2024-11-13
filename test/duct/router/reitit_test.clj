@@ -15,3 +15,17 @@
     (is (= {:status 200, :body "Hello World"}
            (router {:request-method :get, :uri "/"})))
     (is (nil? (router {:request-method :get, :uri "/bad"})))))
+
+(deftest muuntaja-test
+  (let [handler  (constantly {:status 200, :body {:count 1}})
+        config   {:duct.router/reitit
+                  {:routes {"/" {:get {:handler handler}}}
+                   :data   {:muuntaja {}}}}
+        router   (:duct.router/reitit (ig/init config))
+        response (router {:request-method :get
+                          :uri "/"
+                          :headers {"Accept" "application/json"}})]
+    (is (= {:status  200
+            :headers {"Content-Type" "application/json; charset=utf-8"}
+            :body    "{\"count\":1}"}
+           (update response :body slurp)))))
