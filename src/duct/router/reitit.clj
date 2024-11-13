@@ -2,7 +2,8 @@
   (:require [integrant.core :as ig]
             [muuntaja.core :as mu]
             [reitit.ring :as ring]
-            [reitit.ring.middleware.muuntaja :as reitit-muuntaja]))
+            [reitit.ring.coercion :as rrc]
+            [reitit.ring.middleware.muuntaja :as rmu]))
 
 (defn- update-routes-data [routes f]
   (if (vector? routes)
@@ -22,7 +23,7 @@
       (update :data f)))
 
 (def ^:private muuntaja-middleware
-  [reitit-muuntaja/format-middleware])
+  [rmu/format-middleware])
 
 (defn- convert-muuntaja [data]
   (cond-> data
@@ -30,11 +31,28 @@
     (-> (update :muuntaja #(mu/create (merge mu/default-options %)))
         (update :middleware #(into muuntaja-middleware %)))))
 
+(def ^:private coercion-middleware
+  [rrc/coerce-exceptions-middleware
+   rrc/coerce-request-middleware
+   rrc/coerce-response-middleware])
+
+(def ^:private coercion-engines
+  '{:malli  reitit.coercion.malli/coercion
+    :schema reitit.coercion.schema/coercion
+    :spec   reitit.coercion.spec/coercion})
+
+(defn- convert-coercion [data]
+  (cond-> data
+    (:coercion data)
+    (-> (update :coercion (comp var-get requiring-resolve coercion-engines))
+        (update :middleware #(into coercion-middleware %)))))
+
 (def ^:private handler-keys
   [:middleware :inject-match? :inject-router?])
 
 (defmethod ig/init-key :duct.router/reitit [_ options]
   (let [{:keys [routes] :as opts} (-> options
+                                      (update-data convert-coercion)
                                       (update-data convert-muuntaja))]
     (ring/ring-handler
      (ring/router routes (apply dissoc opts handler-keys))

@@ -29,3 +29,17 @@
             :headers {"Content-Type" "application/json; charset=utf-8"}
             :body    "{\"count\":1}"}
            (update response :body slurp)))))
+
+(deftest coercion-test
+  (let [handler  (fn [{:keys [parameters]}]
+                   {:status 200, :body (pr-str parameters)})
+        config   {:duct.router/reitit
+                  {:routes {"/" {:get {:handler handler}
+                                 :parameters {:query {:x :int}}}}
+                   :data   {:coercion :malli}}}
+        router   (:duct.router/reitit (ig/init config))]
+    (is (= {:status 200, :body "{:query {:x 1}}"}
+           (router {:request-method :get
+                    :uri "/"
+                    :query-params {"x" "1"}
+                    :headers {"Accept" "application/json"}})))))
