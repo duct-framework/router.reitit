@@ -43,3 +43,23 @@
                     :uri "/"
                     :query-params {"x" "1"}
                     :headers {"Accept" "application/json"}})))))
+
+(deftest default-handler-test
+  (let [handler (constantly {:status 200, :body "Hello World"})
+        config
+        {:duct.router/reitit
+         {:routes {"/"    {:get {:handler handler}}
+                   "/406" {:handler (constantly nil)}}
+          :default-handler
+          {:not-found (constantly {:status 404, :body "404"})
+           :method-not-allowed (constantly {:status 405, :body "405"})
+           :not-acceptable (constantly {:status 406, :body "406"})}}}
+        router  (:duct.router/reitit (ig/init config))]
+    (is (= {:status 200, :body "Hello World"}
+           (router {:request-method :get, :uri "/"})))
+    (is (= {:status 404, :body "404"}
+           (router {:request-method :get, :uri "/bad"})))
+    (is (= {:status 405, :body "405"}
+           (router {:request-method :post, :uri "/"})))
+    (is (= {:status 406, :body "406"}
+           (router {:request-method :post, :uri "/406"})))))

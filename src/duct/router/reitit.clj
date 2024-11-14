@@ -47,13 +47,11 @@
     (-> (update :coercion (comp var-get requiring-resolve coercion-engines))
         (update :middleware #(into coercion-middleware %)))))
 
-(def ^:private handler-keys
-  [:middleware :inject-match? :inject-router?])
-
 (defmethod ig/init-key :duct.router/reitit [_ options]
-  (let [{:keys [routes] :as opts} (-> options
-                                      (update-data convert-coercion)
-                                      (update-data convert-muuntaja))]
-    (ring/ring-handler
-     (ring/router routes (apply dissoc opts handler-keys))
-     (select-keys opts handler-keys))))
+  (let [opts   (-> options
+                   (update-data convert-coercion)
+                   (update-data convert-muuntaja))
+        router (ring/router (:routes opts) opts)]
+    (if-some [handler (:default-handler opts)]
+      (ring/ring-handler router (ring/create-default-handler handler) opts)
+      (ring/ring-handler router opts))))
