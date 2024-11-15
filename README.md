@@ -28,11 +28,30 @@ configuration:
  :example.handler/root {}}
 ```
 
-The `:routes` option defines the Reitit routes. Other options are
-passed directly to the Reitit router.
-
 Once initiated the `:duct.router/reitit` key will produce a Ring
 handler.
+
+There are four top level options available:
+
+- `:routes` - the Reitit routing data
+- `:middleware` - a vector of middleware to apply to the Ring handler
+- `:data` - data to add to every Reitit route
+- `:default-handler` - a default handlers for error conditions
+
+The `:data` key takes a map and acts as it does in Reitit, except for
+the following keys:
+
+- `:muuntaja` - a map of Muuntaja options to be merged with the defaults
+- `:coercion` - one of: `:malli`, `:schema` or `:spec`
+
+These keys will automatically add relevant middleware.
+
+The `:default-handler` key holds a map that takes the same keys as the
+Reitit `create-default-handler` function:
+
+- `:not-found` - a handler for 404 HTTP errors
+- `:method-not-allowed` - a handler for 405 HTTP errors
+- `:not-acceptable` - a handler for 406 HTTP errors
 
 ## License
 
