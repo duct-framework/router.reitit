@@ -52,7 +52,7 @@
     (assoc opts :path path)))
 
 (defn- create-handlers
-  [{:keys [default-handler file-handlers resource-handlers]}]
+  [{:keys [default-handlers file-handlers resource-handlers]}]
   (concat
    (when file-handlers
      (->> (path-map->options file-handlers)
@@ -60,8 +60,8 @@
    (when resource-handlers
      (->> (path-map->options resource-handlers)
           (map ring/create-resource-handler)))
-   (when default-handler
-     (list (ring/create-default-handler default-handler)))))
+   (when default-handlers
+     (list (ring/create-default-handler default-handlers)))))
 
 (defmethod ig/init-key :duct.router/reitit [_ options]
   (let [opts   (-> options

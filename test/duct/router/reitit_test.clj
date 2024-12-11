@@ -45,13 +45,13 @@
                     :query-params {"x" "1"}
                     :headers {"Accept" "application/json"}})))))
 
-(deftest default-handler-test
+(deftest default-handlers-test
   (let [handler (constantly {:status 200, :body "Hello World"})
         config
         {:duct.router/reitit
          {:routes {"/"    {:get {:handler handler}}
                    "/406" {:handler (constantly nil)}}
-          :default-handler
+          :default-handlers
           {:not-found (constantly {:status 404, :body "404"})
            :method-not-allowed (constantly {:status 405, :body "405"})
            :not-acceptable (constantly {:status 406, :body "406"})}}}
