@@ -1,5 +1,6 @@
 (ns duct.router.reitit-test
   (:require [clojure.test :refer [deftest is]]
+            [clojure.java.io :as io]
             [integrant.core :as ig]
             [duct.router.reitit :as reitit]))
 
@@ -63,3 +64,37 @@
            (router {:request-method :post, :uri "/"})))
     (is (= {:status 406, :body "406"}
            (router {:request-method :post, :uri "/406"})))))
+
+(deftest file-handler-test
+  (let [handler (constantly {:status 200, :body "Hello World"})
+        config
+        {:duct.router/reitit
+         {:routes {"/" {:get {:handler handler}}}
+          :file-handlers {"/" {:root "test/duct/router/files"}}}}
+        router (:duct.router/reitit (ig/init config))]
+    (is (= {:status 200, :body "Hello World"}
+           (router {:request-method :get, :uri "/"})))
+    (is (= {:status 200, :body (io/file "test/duct/router/files/foo.txt")}
+           (-> (router {:request-method :get, :uri "/foo.txt"})
+               (dissoc :headers))))
+    (is (= {:status 200, :body (io/file "test/duct/router/files/bar.txt")}
+           (-> (router {:request-method :get, :uri "/bar.txt"})
+               (dissoc :headers))))))
+
+(deftest resource-handler-test
+  (let [handler (constantly {:status 200, :body "Hello World"})
+        config
+        {:duct.router/reitit
+         {:routes {"/" {:get {:handler handler}}}
+          :resource-handlers {"/" {:root "duct/router/files"}}}}
+        router (:duct.router/reitit (ig/init config))]
+    (is (= {:status 200, :body "Hello World"}
+           (router {:request-method :get, :uri "/"})))
+    (is (= {:status 200, :body "foo\n"}
+           (-> (router {:request-method :get, :uri "/foo.txt"})
+               (dissoc :headers)
+               (update :body slurp))))
+    (is (= {:status 200, :body "bar\n"}
+           (-> (router {:request-method :get, :uri "/bar.txt"})
+               (dissoc :headers)
+               (update :body slurp))))))

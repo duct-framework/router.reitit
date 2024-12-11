@@ -47,11 +47,27 @@
     (-> (update :coercion (comp var-get requiring-resolve coercion-engines))
         (update :middleware #(into coercion-middleware %)))))
 
+(defn- path-map->options [path-map]
+  (for [[path opts] (sort-by key path-map)]
+    (assoc opts :path path)))
+
+(defn- create-handlers
+  [{:keys [default-handler file-handlers resource-handlers]}]
+  (concat
+   (when file-handlers
+     (->> (path-map->options file-handlers)
+          (map ring/create-file-handler)))
+   (when resource-handlers
+     (->> (path-map->options resource-handlers)
+          (map ring/create-resource-handler)))
+   (when default-handler
+     (list (ring/create-default-handler default-handler)))))
+
 (defmethod ig/init-key :duct.router/reitit [_ options]
   (let [opts   (-> options
                    (update-data convert-coercion)
                    (update-data convert-muuntaja))
         router (ring/router (:routes opts) opts)]
-    (if-some [handler (:default-handler opts)]
-      (ring/ring-handler router (ring/create-default-handler handler) opts)
+    (if-some [handlers (seq (create-handlers opts))]
+      (ring/ring-handler router (apply ring/routes handlers) opts)
       (ring/ring-handler router opts))))
