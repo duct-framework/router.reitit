@@ -52,6 +52,6 @@
                    (update-data convert-coercion)
                    (update-data convert-muuntaja))
         router (ring/router (:routes opts) opts)]
-    (if-some [handler (:default-handler opts)]
-      (ring/ring-handler router (ring/create-default-handler handler) opts)
+    (if-some [handlers (seq (:handlers opts))]
+      (ring/ring-handler router (apply ring/routes handlers) opts)
       (ring/ring-handler router opts))))

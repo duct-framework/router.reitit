@@ -36,7 +36,7 @@ There are four top level options available:
 - `:routes` - the Reitit routing data
 - `:middleware` - a vector of middleware to apply to the Ring handler
 - `:data` - data to add to every Reitit route
-- `:default-handler` - a default handlers for error conditions
+- `:handlers` - a vector of handlers to fall back
 
 The `:data` key takes a map and acts as it does in Reitit, except for
 the following keys:
@@ -46,12 +46,24 @@ the following keys:
 
 These keys will automatically add relevant middleware.
 
-The `:default-handler` key holds a map that takes the same keys as the
-Reitit `create-default-handler` function:
+The `:duct.handler.reitit/default` key will initiate into a handler
+using the Reitit `create-default-handler` function. It takes the
+following options:
 
 - `:not-found` - a handler for 404 HTTP errors
 - `:method-not-allowed` - a handler for 405 HTTP errors
 - `:not-acceptable` - a handler for 406 HTTP errors
+
+This can be referenced in the `:handlers` vector to provide a default
+handler:
+
+```edn
+{:duct.router/reitit
+ {:routes   ["/" {:get #ig/ref :example.handler/root}]
+  :handlers [#ig/ref :duct.handler.reitit/default]}
+ :duct.handler.reitit/default {}
+ :example.handler/root {}}
+```
 
 ## License
 

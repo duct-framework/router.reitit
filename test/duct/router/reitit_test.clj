@@ -1,7 +1,8 @@
 (ns duct.router.reitit-test
   (:require [clojure.test :refer [deftest is]]
             [integrant.core :as ig]
-            [duct.router.reitit :as reitit]))
+            [duct.router.reitit]
+            [duct.handler.reitit]))
 
 (deftest hierarchy-test
   (ig/load-hierarchy)
@@ -50,11 +51,12 @@
         {:duct.router/reitit
          {:routes {"/"    {:get {:handler handler}}
                    "/406" {:handler (constantly nil)}}
-          :default-handler
-          {:not-found (constantly {:status 404, :body "404"})
-           :method-not-allowed (constantly {:status 405, :body "405"})
-           :not-acceptable (constantly {:status 406, :body "406"})}}}
-        router  (:duct.router/reitit (ig/init config))]
+          :handlers [(ig/ref :duct.handler.reitit/default)]}
+         :duct.handler.reitit/default
+         {:not-found (constantly {:status 404, :body "404"})
+          :method-not-allowed (constantly {:status 405, :body "405"})
+          :not-acceptable (constantly {:status 406, :body "406"})}}
+        router (:duct.router/reitit (ig/init config))]
     (is (= {:status 200, :body "Hello World"}
            (router {:request-method :get, :uri "/"})))
     (is (= {:status 404, :body "404"}
