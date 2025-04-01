@@ -65,3 +65,20 @@
            (router {:request-method :post, :uri "/"})))
     (is (= {:status 406, :body "406"}
            (router {:request-method :post, :uri "/406"})))))
+
+(defn- wrap-header [handler header value]
+  (fn [request]
+    (-> (handler request)
+        (assoc-in [:headers header] value))))
+
+(deftest middleware-test
+  (let [handler (constantly {:status 200, :body "Hello World"})
+        config  {:duct.router/reitit
+                 {:routes {"/" {:get {:handler handler}}}
+                  :module-middleware [[wrap-header "X-One" "1"]]
+                  :middleware [[wrap-header "X-Two" "2"]]
+                  :data {:module-middleware [[wrap-header "X-Three" "3"]]
+                         :middleware [[wrap-header "X-Four" "4"]]}}}
+        router  (:duct.router/reitit (ig/init config))]
+    (is (= {"X-One" "1", "X-Two" "2", "X-Three" "3", "X-Four" "4"}
+           (:headers (router {:request-method :get, :uri "/"}))))))

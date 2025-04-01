@@ -33,9 +33,10 @@ handler.
 
 There are four top level options available:
 
-- `:routes` - the Reitit routing data
+- `:routes`     - the Reitit routing data
 - `:middleware` - a vector of middleware to apply to the Ring handler
-- `:data` - data to add to every Reitit route
+- `:module-middleware` - the same as above, but designed for modules
+- `:data`     - data to add to every Reitit route
 - `:handlers` - a vector of handlers to fall back
 
 The `:data` key takes a map and acts as it does in Reitit, except for
@@ -43,8 +44,13 @@ the following keys:
 
 - `:muuntaja` - a map of Muuntaja options to be merged with the defaults
 - `:coercion` - one of: `:malli`, `:schema` or `:spec`
+- `:module-middleware` - a vector of middleware applied only if the
+                         route matches
 
-These keys will automatically add relevant middleware.
+The `:module-middleware`  keys work the same as the `:middleware` key but
+are applied last, as the outermost middleware. They are intended to allow
+a base set of middleware to be applied by modules, without interfering
+with middleware that is set by users.
 
 The `:duct.handler.reitit/default` key will initiate into a handler
 using the Reitit `create-default-handler` function. It takes the
