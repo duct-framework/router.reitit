@@ -47,18 +47,11 @@
     (-> (update :coercion (comp var-get requiring-resolve coercion-engines))
         (update :middleware #(into coercion-middleware %)))))
 
-(defn- merge-module-middleware [options]
-  (-> options
-      (dissoc :module-middleware)
-      (update :middleware #(into (vec (:module-middleware options)) %))))
-
 (defmethod ig/init-key :duct.router/reitit [_ options]
   (let [opts   (-> options
-                   (merge-module-middleware)
-                   (update-data merge-module-middleware)
                    (update-data convert-coercion)
                    (update-data convert-muuntaja))
         router (ring/router (:routes opts) opts)]
     (if-some [handlers (seq (:handlers opts))]
       (ring/ring-handler router (apply ring/routes handlers) opts)
-      (ring/ring-handler router nil opts))))
+      (ring/ring-handler router opts))))
