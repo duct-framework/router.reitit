@@ -11,11 +11,11 @@ compatible with [Integrant][].
 
 Add the following dependency to your deps.edn file:
 
-    org.duct-framework/router.reitit {:mvn/version "0.4.0"}
+    org.duct-framework/router.reitit {:mvn/version "0.5.0"}
 
 Or to your Leiningen project file:
 
-    [org.duct-framework/router.reitit "0.4.0"]
+    [org.duct-framework/router.reitit "0.5.0"]
 
 ## Usage
 
