@@ -1,5 +1,5 @@
 (ns duct.router.reitit-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [integrant.core :as ig]
             [duct.router.reitit]
             [duct.handler.reitit]))
@@ -65,3 +65,32 @@
            (router {:request-method :post, :uri "/"})))
     (is (= {:status 406, :body "406"}
            (router {:request-method :post, :uri "/406"})))))
+
+(deftest nested-routes-test
+  (testing "nested route"
+    (let [handler (constantly {:status 200, :body "Hello World"})
+          config  {:duct.router/reitit
+                   {:routes
+                    ["/foo" {:name ::foo}
+                     ["/bar" {:name ::bar}]
+                     ["/baz" {:get {:handler handler}}]]}}
+          router  (:duct.router/reitit (ig/init config))]
+      (is (= {:status 200, :body "Hello World"}
+             (router {:request-method :get, :uri "/foo/baz"})))
+      (is (nil? (router {:request-method :get, :uri "/foo/bad"})))))
+  (testing "nested route with data"
+    (let [handler  (constantly {:status 200, :body {:count 1}})
+          config   {:duct.router/reitit
+                    {:routes
+                     ["/foo" {:name ::foo}
+                      ["/bar" {:name ::bar}]
+                      ["/baz" {:get {:handler handler}
+                               :muuntaja {}}]]}}
+          router   (:duct.router/reitit (ig/init config))
+          response (router {:request-method :get
+                            :uri "/foo/baz"
+                            :headers {"Accept" "application/json"}})]
+      (is (= {:status  200
+              :headers {"Content-Type" "application/json; charset=utf-8"}
+              :body    "{\"count\":1}"}
+             (update response :body slurp))))))

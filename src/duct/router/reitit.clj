@@ -7,14 +7,11 @@
 
 (defn- update-routes-data [routes f]
   (if (vector? routes)
-    (if (vector? (first routes))
-      (mapv #(update-routes-data % f) routes)
-      (let [[path data] routes]
-        [path (cond
-                (vector? data)  (update-routes-data data f)
-                (map? data)     (f data)
-                (keyword? data) (f {:name data})
-                :else           data)]))
+    (mapv #(cond
+             (map? %)     (f %)
+             (keyword? %) (f {:name %})
+             :else        (update-routes-data % f))
+          routes)
     routes))
 
 (defn- update-data [options f]
