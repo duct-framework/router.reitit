@@ -3,7 +3,7 @@
   :url "https://github.com/duct-framework/router.reitit"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.12.1"]
-                 [integrant "0.13.1"]
+  :dependencies [[org.clojure/clojure "1.12.2"]
+                 [integrant "1.0.0"]
                  [metosin/reitit "0.9.1"]]
   :repl-options {:init-ns duct.router.reitit})
