@@ -1,0 +1,30 @@
+{:duct.router/reitit
+ {:doc
+  "Creates a Ring handler using the [Reitit][1] routing library.
+
+  Takes the following options:
+  - `:routes` - the Reitit routing data
+  - `:middleware` - a vector of middleware to apply to the Ring handler
+  - `:data` - data to add to every Reitit route
+  - `:handlers` - a vector of handlers to fall back
+
+  The `:data` key takes a map and acts as it does in Reitit, except for
+  the following keys:
+  - `:muuntaja` - a map of Muuntaja options to be merged with the defaults
+  - `:coercion` - one of: `:malli`, `:schema` or `:spec`
+
+  These keys will automatically add relevant middleware.
+
+  [1]: https://github.com/metosin/reitit"}
+
+ :duct.handler/reitit
+ {:doc
+  "Creates a Ring handler using the [Reitit][1] `create-default-handler`
+  function.
+
+  Takes the following options:
+  - `:not-found` - a handler for 404 HTTP errors
+  - `:method-not-allowed` - a handler for 405 HTTP errors
+  - `:not-acceptable` - a handler for 406 HTTP errors
+
+  [1]: https://github.com/metosin/reitit"}}
