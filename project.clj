@@ -1,4 +1,4 @@
-(defproject org.duct-framework/router.reitit "0.5.1"
+(defproject org.duct-framework/router.reitit "0.5.2"
   :description "Integrant methods for the Reitit routing library"
   :url "https://github.com/duct-framework/router.reitit"
   :license {:name "Eclipse Public License"
